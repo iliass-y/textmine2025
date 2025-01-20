@@ -1,1 +1,1 @@
-Code for my entry to the 2025 textmine challenge
+Code for my 2025 textmine challenge entry
