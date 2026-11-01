@@ -5,15 +5,17 @@ conference in Strasbourg in January 2025. The task is relation extraction from F
 text comes with its annotated entities, and the system predicts the relations between them.
 
 The method is described in the paper
-[Tackling Class Imbalance in Relation Extraction for french text: Effective Negative Sampling and Advanced Loss Functions](https://hal.science/hal-05099002)
+[Tackling Class Imbalance in Relation Extraction for french text: Effective Negative Sampling and
+Advanced Loss Functions](https://hal.science/hal-05099002)
 (I. Ayaou, TextMine workshop, EGC 2025).
 
 ## 1. Method
 
 The task is treated as multi-label classification of entity pairs.
 
-- Negative sampling: pairs without a relation are labelled `no_relation`, three for each positive
-  pair (`negative_ratio=3` in `train.py`).
+- Negative sampling: pairs without a relation are labelled `no_relation`, up to three for each
+  positive pair of a text, drawn from entity pairs whose types admit a relation (`negative_ratio=3`
+  in `train.py`).
 - Special tokens mark the entities and the candidate relations in the text. A self-reflective marker
   handles relations from an entity to itself, such as `GENDER_MALE` and `GENDER_FEMALE`, for the
   types `CIVILIAN`, `TERRORIST_OR_CRIMINAL` and `MILITARY`.
@@ -29,17 +31,19 @@ The task is treated as multi-label classification of entity pairs.
 
 | File | Content |
 |---|---|
-| `train.py` | Data preparation, an 80/20 stratified split of `train.csv`, fine-tuning and threshold search |
+| `train.py` | Data preparation, an 80/20 multilabel stratified split of the entity pairs built from `train.csv`, fine-tuning and threshold search |
 | `eval.py` | Prediction on the test file and writing of `submission.csv` |
 | `train.csv` | Training texts with entities and relations, 800 rows |
 | `test_01-07-2024.csv` | Test texts with entities, 400 rows |
 
 ## 3. Requirements
 
-Python with `pandas`, `numpy`, `torch`, `transformers`, `scikit-learn`, `iterative-stratification`,
-`spacy` and `tqdm`, and the spaCy model `fr_core_news_lg`
-(`python -m spacy download fr_core_news_lg`). Training uses `fp16=True` and 48 data loader workers,
-so it expects a CUDA GPU. The experiments of the paper ran on one Tesla V100 with 32 GB.
+Python with `pandas`, `numpy`, `torch`, `transformers` 4.41 to 4.45, `accelerate`, `scikit-learn`,
+`iterative-stratification`, `spacy` and `tqdm`, and the spaCy model `fr_core_news_lg`
+(`python -m spacy download fr_core_news_lg`). `train.py` uses `eval_strategy`, added in transformers
+4.41, and overrides `compute_loss` without the `num_items_in_batch` argument that transformers 4.46
+passes. Training uses `fp16=True` and 48 data loader workers, so it expects a CUDA GPU. The
+experiments of the paper ran on one Tesla V100 with 32 GB.
 
 ## 4. Usage
 
